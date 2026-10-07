@@ -1,0 +1,30 @@
+{
+  "name": "whatsapp-md-controller",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Secure single-admin WhatsApp Web companion dashboard powered by Baileys.",
+  "workspaces": [
+    "backend",
+    "frontend"
+  ],
+  "scripts": {
+    "dev": "node -r dotenv/config ./node_modules/concurrently/dist/bin/concurrently.js --kill-others-on-fail -n API,WEB -c blue,green \"npm run dev --workspace backend\" \"npm run dev --workspace frontend\"",
+    "build": "npm run build --workspace backend && npm run build --workspace frontend",
+    "typecheck": "npm run typecheck --workspace backend && npm run typecheck --workspace frontend",
+    "setup": "npm run prisma:generate --workspace backend && npm run prisma:db:push --workspace backend",
+    "start:backend": "npm run start --workspace backend",
+    "start:frontend": "npm run start --workspace frontend",
+    "clean": "node -e \"const fs=require('fs'); for (const p of ['backend/dist','frontend/.next']) fs.rmSync(p,{recursive:true,force:true})\""
+  },
+  "devDependencies": {
+    "concurrently": "9.2.4",
+    "dotenv": "^16.6.1"
+  },
+  "overrides": {
+    "next": { "postcss": "8.5.29" },
+    "shell-quote": "1.12.0"
+  },
+  "engines": {
+    "node": ">=20.11.0"
+  }
+}

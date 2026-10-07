@@ -1,0 +1,62 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Session {
+  id              String    @id @default(cuid())
+  phoneNumber     String    @unique
+  status          String    @default("disconnected")
+  lastConnectedAt DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  chats           Chat[]
+  messages        Message[]
+
+  @@index([status])
+  @@index([createdAt])
+}
+
+model Chat {
+  id                 String    @id @default(cuid())
+  sessionId          String
+  jid                String
+  name               String
+  isGroup            Boolean   @default(false)
+  unreadCount        Int       @default(0)
+  lastMessageAt      DateTime?
+  lastMessagePreview String?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  session            Session   @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  messages           Message[]
+
+  @@unique([sessionId, jid])
+  @@index([sessionId, lastMessageAt])
+}
+
+model Message {
+  id             String   @id @default(cuid())
+  sessionId      String
+  chatJid        String
+  waMessageId    String
+  fromMe         Boolean  @default(false)
+  senderJid      String?
+  messageType    String   @default("text")
+  text           String?
+  mediaFilename  String?
+  mimeType       String?
+  fileName       String?
+  status         String   @default("received")
+  timestamp      DateTime @default(now())
+  createdAt      DateTime @default(now())
+  session        Session  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  chat           Chat     @relation(fields: [sessionId, chatJid], references: [sessionId, jid], onDelete: Cascade)
+
+  @@unique([sessionId, waMessageId])
+  @@index([sessionId, chatJid, timestamp])
+}

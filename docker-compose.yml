@@ -1,0 +1,35 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    env_file: .env
+    environment:
+      NODE_ENV: development
+      DB_PROVIDER: sqlite
+      DATABASE_URL: file:../data/dev.db
+      AUTH_DIR: /app/backend/data/auth
+      UPLOAD_DIR: /app/backend/data/uploads
+      PORT: 4000
+      CORS_ORIGINS: http://localhost:3000
+    ports:
+      - "4000:4000"
+    volumes:
+      - ./backend/data:/app/backend/data
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: http://localhost:4000
+    environment:
+      PORT: 3000
+      HOSTNAME: 0.0.0.0
+    ports:
+      - "3000:3000"
+    depends_on:
+      backend:
+        condition: service_started
+    restart: unless-stopped
